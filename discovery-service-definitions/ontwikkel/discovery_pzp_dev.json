@@ -1,5 +1,5 @@
 {
-  "id": "HuisartsVVTInzage",
+  "id": "pzp-dev",
   "endpoint": "http://localhost:9091/discovery/pzp",
   "presentation_max_validity": 3600,
   "presentation_definition": {

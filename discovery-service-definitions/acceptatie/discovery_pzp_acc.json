@@ -1,5 +1,5 @@
 {
-  "id": "HuisartsVVTInzage",
+  "id": "pzp-acc",
   "endpoint": "https://nuts.acceptatie-datakluis.shared.topicuszorg.nl/discovery/pzp",
   "presentation_max_validity": 259200,
   "presentation_definition": {
