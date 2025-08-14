@@ -61,7 +61,7 @@ activate App_data_user
         group get access token    
             App_data_user -> Nuts_node_data_user: Get access token \nPOST /internal/auth/v2/{subjectID}/request-service-access-token \nuse subject-id, authz-server-url found earlier
             activate Nuts_node_data_user
-                Nuts_node_data_user <--> sn : nuts-nodes handle access token request
+                Nuts_node_data_user <--> Nuts_node_data_holder : nuts-nodes handle access token request
                 note right of Nuts_node_data_user : uses X509Credential and NutsEmployeeCredential
                 Nuts_node_data_user --> App_data_user : Access token
             deactivate Nuts_node_data_user
