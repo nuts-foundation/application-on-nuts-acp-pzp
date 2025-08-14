@@ -1,0 +1,103 @@
+@startuml
+hide footbox
+autonumber
+skinparam BoxPadding 20
+
+box data_user
+actor User
+participant App_data_user
+participant Nuts_node_data_user
+end box
+
+actor Discovery_Service
+
+box data_holder
+participant Nuts_node_data_holder
+participant AAA_Proxy
+participant Fhir_server_data_holder
+end box
+User -> App_data_user : Log in
+App_data_user -> App_data_user : Create User session, \nUser info needed for NutsEmployeeCredential (step 7)
+
+== Later in User session ==
+
+User -> App_data_user : GP request ACP information for Patient X
+activate App_data_user
+    App_data_user -> App_data_user: Resolve Patient BSN
+
+    group localize data
+        group #pink option 1: localize and find addresses using Discovery Service
+            App_data_user -> Nuts_node_data_user: Find all organizations that support the pzp service \nGet /internal/discovery/v1/pzp
+            Nuts_node_data_user --> App_data_user: array of presentations of all orgnizations that support pzp
+            App_data_user-> App_data_user: store array "ArrayOfPresentations"
+        end group
+
+        group #lightblue option 2: localize using a local CareTeam, find addresses using Discovery Service
+            App_data_user -> App_data_user: get local CareTeam FHIR-resource of Patient X
+        end group
+
+        group #LightYellow option 3: localize using NVI, find addresses using Discovery Service
+            App_data_user->App_data_user: to do
+        end group
+    end group
+
+    loop for each found data holder
+        group get endpoint addresses
+            group #pink option 1: localize and find addresses using Discovery Service
+                App_data_user-> App_data_user: get the FHIR-endpoint address from the array "ArrayOfPresentations", filter on URA
+            end group
+            
+            group #lightblue option 2: localize using a local CareTeam, find addresses using Discovery Service
+                App_data_user -> Nuts_node_data_user: Get organization details by URA \nGET /internal/discovery/v1/pzp \npayload { id_uzicert_x509credential.organization_ura = <URA> }
+                Nuts_node_data_user --> App_data_user: presentation that includes subject-id, authz-server-url and fhir-base-url
+            end group
+
+            group #LightYellow option 3: localize using NVI, find addresses using Discovery Service
+                App_data_user -> Nuts_node_data_user: Get organization details by URA \nGET /internal/discovery/v1/pzp \npayload { id_uzicert_x509credential.organization_ura = <URA> }
+                Nuts_node_data_user --> App_data_user: presentation that includes subject-id, authz-server-url and and fhir-base-url
+            end group
+        end group
+
+        group get access token    
+            App_data_user -> Nuts_node_data_user: Get access token \nPOST /internal/auth/v2/{subjectID}/request-service-access-token \nuse subject-id, authz-server-url found earlier
+            activate Nuts_node_data_user
+                Nuts_node_data_user <--> sn : nuts-nodes handle access token request
+                note right of Nuts_node_data_user : uses X509Credential and NutsEmployeeCredential
+                Nuts_node_data_user --> App_data_user : Access token
+            deactivate Nuts_node_data_user
+        end group
+
+        group get Patient by bsn
+            App_data_user -> AAA_Proxy: POST /fhir/Patient/_search
+            activate AAA_Proxy
+                AAA_Proxy -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
+                activate Nuts_node_data_holder
+                    Nuts_node_data_holder-->AAA_Proxy : valid token + URA of data_user + USER{name,userRole,identifier}
+                deactivate Nuts_node_data_holder
+                AAA_Proxy -> AAA_Proxy: Authorization
+                AAA_Proxy->Fhir_server_data_holder: forward request
+                Fhir_server_data_holder-->AAA_Proxy: Patient-resource
+                AAA_Proxy --> App_data_user: forward Patient-resource
+            deactivate AAA_Proxy
+        end group
+
+        group get TreatmentDirective2 by Patient-reference
+            App_data_user -> AAA_Proxy: GET /fhir/Consent?patient=<patient-reference>
+            activate AAA_Proxy
+                AAA_Proxy -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
+                activate Nuts_node_data_holder
+                    Nuts_node_data_holder-->AAA_Proxy : valid token + URA of data_user + USER{name,userRole,identifier}
+                deactivate Nuts_node_data_holder
+                AAA_Proxy -> AAA_Proxy: Authorization
+                AAA_Proxy->Fhir_server_data_holder: forward request
+                Fhir_server_data_holder-->AAA_Proxy: Consent-resource
+                AAA_Proxy --> App_data_user: forward Consent-resource
+            deactivate AAA_Proxy
+        end group
+
+    end loop
+    
+    App_data_user-->User : Display data
+deactivate App_data_user
+
+@enduml
