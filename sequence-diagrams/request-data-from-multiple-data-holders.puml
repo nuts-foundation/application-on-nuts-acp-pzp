@@ -24,7 +24,7 @@ activate App_data_user
     group localize data
         group #pink option 1: localize and find addresses using Discovery Service
             App_data_user -> Nuts_node_data_user: Find all organizations that support the pzp service \nGet /internal/discovery/v1/pzp
-            Nuts_node_data_user --> App_data_user: array of presentations of all orgnizations that support pzp
+            Nuts_node_data_user --> App_data_user: array of presentations of all organizations that support pzp
             App_data_user-> App_data_user: store array "ArrayOfPresentations"
         end group
 
@@ -40,22 +40,22 @@ activate App_data_user
     loop for each found data holder
         group get endpoint addresses
             group #pink option 1: localize and find addresses using Discovery Service
-                App_data_user-> App_data_user: get the FHIR-endpoint address from the array "ArrayOfPresentations", filter on URA
+                App_data_user-> App_data_user: get authz-server-url and fhir-base-url from the array "ArrayOfPresentations", filter on URA
             end group
             
             group #lightblue option 2: localize using a local CareTeam, find addresses using Discovery Service
                 App_data_user -> Nuts_node_data_user: Get organization details by URA \nGET /internal/discovery/v1/pzp \npayload { id_uzicert_x509credential.organization_ura = <URA> }
-                Nuts_node_data_user --> App_data_user: presentation that includes subject-id, authz-server-url and fhir-base-url
+                Nuts_node_data_user --> App_data_user: presentation that includes authz-server-url and fhir-base-url
             end group
 
             group #LightYellow option 3: localize using NVI, find addresses using Discovery Service
                 App_data_user -> Nuts_node_data_user: Get organization details by URA \nGET /internal/discovery/v1/pzp \npayload { id_uzicert_x509credential.organization_ura = <URA> }
-                Nuts_node_data_user --> App_data_user: presentation that includes subject-id, authz-server-url and and fhir-base-url
+                Nuts_node_data_user --> App_data_user: presentation that includes authz-server-url and and fhir-base-url
             end group
         end group
 
         group get access token    
-            App_data_user -> Nuts_node_data_user: Get access token \nPOST /internal/auth/v2/{subjectID}/request-service-access-token \nuse subject-id, authz-server-url found earlier
+            App_data_user -> Nuts_node_data_user: Get access token \nPOST /internal/auth/v2/{subjectID}/request-service-access-token \nuse authz-server-url found earlier
             activate Nuts_node_data_user
                 Nuts_node_data_user <--> Nuts_node_data_holder : nuts-nodes handle access token request
                 note right of Nuts_node_data_user : uses X509Credential and NutsEmployeeCredential
@@ -68,7 +68,7 @@ activate App_data_user
             activate AAA_Proxy_data_holder
                 AAA_Proxy_data_holder -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
                 activate Nuts_node_data_holder
-                    Nuts_node_data_holder-->AAA_Proxy_data_holder : valid token + URA of data_user + USER{name,userRole,identifier}
+                    Nuts_node_data_holder-->AAA_Proxy_data_holder : valid token + URA of data_user_organization + name,userRole,identifier of data_user_person
                 deactivate Nuts_node_data_holder
                 AAA_Proxy_data_holder -> AAA_Proxy_data_holder: Authorization
                 AAA_Proxy_data_holder->Fhir_server_data_holder: forward request
