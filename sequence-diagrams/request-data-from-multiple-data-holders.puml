@@ -3,25 +3,21 @@ hide footbox
 autonumber
 skinparam BoxPadding 20
 
-box data_user
-actor User
+box data_user_organisation
+actor data_user_person
 participant App_data_user
 participant Nuts_node_data_user
 end box
 
-actor Discovery_Service
-
-box data_holder
+box data_holder_organisation
 participant Nuts_node_data_holder
-participant AAA_Proxy
+participant AAA_Proxy_data_holder
 participant Fhir_server_data_holder
 end box
-User -> App_data_user : Log in
+data_user_person -> App_data_user : Log in
 App_data_user -> App_data_user : Create User session, \nUser info needed for NutsEmployeeCredential (step 7)
 
-== Later in User session ==
-
-User -> App_data_user : GP request ACP information for Patient X
+data_user_person -> App_data_user : GP request ACP information for Patient X
 activate App_data_user
     App_data_user -> App_data_user: Resolve Patient BSN
 
@@ -68,36 +64,35 @@ activate App_data_user
         end group
 
         group get Patient by bsn
-            App_data_user -> AAA_Proxy: POST /fhir/Patient/_search
-            activate AAA_Proxy
-                AAA_Proxy -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
+            App_data_user -> AAA_Proxy_data_holder: POST /fhir/Patient/_search
+            activate AAA_Proxy_data_holder
+                AAA_Proxy_data_holder -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
                 activate Nuts_node_data_holder
-                    Nuts_node_data_holder-->AAA_Proxy : valid token + URA of data_user + USER{name,userRole,identifier}
+                    Nuts_node_data_holder-->AAA_Proxy_data_holder : valid token + URA of data_user + USER{name,userRole,identifier}
                 deactivate Nuts_node_data_holder
-                AAA_Proxy -> AAA_Proxy: Authorization
-                AAA_Proxy->Fhir_server_data_holder: forward request
-                Fhir_server_data_holder-->AAA_Proxy: Patient-resource
-                AAA_Proxy --> App_data_user: forward Patient-resource
-            deactivate AAA_Proxy
+                AAA_Proxy_data_holder -> AAA_Proxy_data_holder: Authorization
+                AAA_Proxy_data_holder->Fhir_server_data_holder: forward request
+                Fhir_server_data_holder-->AAA_Proxy_data_holder: Patient-resource
+                AAA_Proxy_data_holder --> App_data_user: forward Patient-resource
+            deactivate AAA_Proxy_data_holder
         end group
 
         group get TreatmentDirective2 by Patient-reference
-            App_data_user -> AAA_Proxy: GET /fhir/Consent?patient=<patient-reference>
-            activate AAA_Proxy
-                AAA_Proxy -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
+            App_data_user -> AAA_Proxy_data_holder: GET /fhir/Consent?patient=<patient-reference>
+            activate AAA_Proxy_data_holder
+                AAA_Proxy_data_holder -> Nuts_node_data_holder : introspect access token\nPOST /internal/auth/v2/accesstoken/introspect
                 activate Nuts_node_data_holder
-                    Nuts_node_data_holder-->AAA_Proxy : valid token + URA of data_user + USER{name,userRole,identifier}
+                    Nuts_node_data_holder-->AAA_Proxy_data_holder : valid token + URA of data_user + USER{name,userRole,identifier}
                 deactivate Nuts_node_data_holder
-                AAA_Proxy -> AAA_Proxy: Authorization
-                AAA_Proxy->Fhir_server_data_holder: forward request
-                Fhir_server_data_holder-->AAA_Proxy: Consent-resource
-                AAA_Proxy --> App_data_user: forward Consent-resource
-            deactivate AAA_Proxy
+                AAA_Proxy_data_holder -> AAA_Proxy_data_holder: Authorization
+                AAA_Proxy_data_holder->Fhir_server_data_holder: forward request
+                Fhir_server_data_holder-->AAA_Proxy_data_holder: Consent-resource
+                AAA_Proxy_data_holder --> App_data_user: forward Consent-resource
+            deactivate AAA_Proxy_data_holder
         end group
-
     end loop
     
-    App_data_user-->User : Display data
+    App_data_user-->data_user_person : Display data
 deactivate App_data_user
 
 @enduml
