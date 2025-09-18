@@ -1,5 +1,5 @@
 {
-  "id": "pzp-dev",
+  "id": "pzp",
   "endpoint": "http://localhost:9091/discovery/pzp",
   "presentation_max_validity": 3600,
   "presentation_definition": {
@@ -24,7 +24,7 @@
     "input_descriptors": [
       {
         "id": "id_uzicert_x509credential",
-        "name": "Care organization identity from CIBG-issued UZI-server certificate",
+        "name": "Care organization identity from fake UZI-server certificate or CIBG-issued test UZI-server certificate",
         "purpose": "Finding a care organization for authorizing access to medical metadata using a national identifier (ura).",
         "constraints": {
           "fields": [
@@ -45,7 +45,7 @@
 
               "filter": {
                 "type": "string",
-                "pattern": "^did:x509:0:sha256:GwlhBZuEFlSHXSRUXQuTs3_YpQxAahColwJJj35US1A[\\w\\-.:%]*$"
+                "pattern": "^did:x509:0:sha256:(GwlhBZuEFlSHXSRUXQuTs3_YpQxAahColwJJj35US1A|szqMaTpnD6GN0aRrT98eV4bhAoOgyItEZVyskYyL_Qc)[\\w\\-.:%]*$"
               }
             },
             { 

@@ -1,5 +1,5 @@
 {
-  "id": "pzp-prod",
+  "id": "pzp",
   "endpoint": "https://nuts.datakluis.shared.topicuszorg.nl/discovery/pzp",
   "presentation_max_validity": 259200,
   "presentation_definition": {
