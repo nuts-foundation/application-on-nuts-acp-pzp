@@ -45,7 +45,7 @@
 
               "filter": {
                 "type": "string",
-                "pattern": "^did:x509:0:sha256:(GwlhBZuEFlSHXSRUXQuTs3_YpQxAahColwJJj35US1A|szqMaTpnD6GN0aRrT98eV4bhAoOgyItEZVyskYyL_Qc)[\\w\\-.:%]*$"
+                "pattern": "^did:x509:0:sha256:(GwlhBZuEFlSHXSRUXQuTs3_YpQxAahColwJJj35US1A|szqMaTpnD6GN0aRrT98eV4bhAoOgyItEZVyskYyL_Qc|svKzNxhS07V1dKkekWOZV0d6Ao7_qvjqXegWB32YjZE)[\\w\\-.:%]*$"
               }
             },
             { 
