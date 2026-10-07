@@ -44,7 +44,7 @@
                 "purpose": "We can only accept credentials from a trusted issuer",
                 "filter": {
                   "type": "string",
-                  "pattern": "^did:x509:0:sha256:vdhg746H4rLH67NN1unhdxo6PF3shQunCA4-KQTb2Jc[\\w\\-.:%]*$"
+                  "pattern": "^did:x509:0:sha256:(vdhg746H4rLH67NN1unhdxo6PF3shQunCA4-KQTb2Jc|sDTL__yv54TtrvSf7601TtvHgj2NZSLT2m-Okf8oqkI)[\\w\\-.:%]*$"
                 }
               },
               { 
